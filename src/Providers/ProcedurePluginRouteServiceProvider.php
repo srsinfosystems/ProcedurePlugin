@@ -1,14 +1,14 @@
 <?php
-namespace HelloWorld\Providers;
+namespace ProcedurePlugin\Providers;
 
 use Plenty\Plugin\RouteServiceProvider;
 use Plenty\Plugin\Routing\Router;
 
 /**
- * Class HelloWorldRouteServiceProvider
- * @package HelloWorld\Providers
+ * Class ProcedurePluginRouteServiceProvider
+ * @package ProcedurePlugin\Providers
  */
-class HelloWorldRouteServiceProvider extends RouteServiceProvider
+class ProcedurePluginRouteServiceProvider extends RouteServiceProvider
 {
 	/**
 	 * @param Router $router

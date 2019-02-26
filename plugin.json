@@ -1,8 +1,8 @@
 {
-      "name":"HelloWorld",
+      "name":"ProcedurePlugin",
       "description":"My first plugin",
-      "namespace":"HelloWorld",
+      "namespace":"ProcedurePlugin",
       "author":"Christian Moll",
       "type":"template",
-      "serviceProvider":"HelloWorld\\Providers\\HelloWorldServiceProvider"
+      "serviceProvider":"ProcedurePlugin\\Providers\\ProcedurePluginServiceProvider"
 }

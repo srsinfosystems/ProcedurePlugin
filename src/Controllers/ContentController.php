@@ -1,12 +1,12 @@
 <?php
-namespace HelloWorld\Controllers;
+namespace ProcedurePlugin\Controllers;
 
 use Plenty\Plugin\Controller;
 use Plenty\Plugin\Templates\Twig;
 
 /**
  * Class ContentController
- * @package HelloWorld\Controllers
+ * @package ProcedurePlugin\Controllers
  */
 class ContentController extends Controller
 {
@@ -63,8 +63,8 @@ class ContentController extends Controller
 		}
 
 		$orderStatusOrderId = $this->orderStatusOrderId($acquireOrder);
-
-		return $twig->render('HelloWorld::content.getorder',array('data' => $acquireOrder));
+		$OrderFlagProperty = $this->OrderFlagProperty();
+		return $twig->render('ProcedurePlugin::content.getorder',array('data' => $acquireOrder));
 	}
 
 	public function reserve($operationData){
@@ -485,6 +485,43 @@ class ContentController extends Controller
 			$json = json_encode($xml);
 			$arrayData = json_decode($json,TRUE); 
 		  return $arrayData;
+		}
+	}
+
+	public function OrderFlagProperty($orderId, $flagValue){
+		$login = $this->login();
+		$login = json_decode($login, true);
+		$access_token = $login['access_token'];
+		$host = $_SERVER['HTTP_HOST'];
+
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+		  CURLOPT_URL => "https://".$host."/rest/orders/".$orderId."/properties",
+		  CURLOPT_RETURNTRANSFER => true,
+		  CURLOPT_ENCODING => "",
+		  CURLOPT_MAXREDIRS => 10,
+		  CURLOPT_TIMEOUT => 30,
+		  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		  CURLOPT_CUSTOMREQUEST => "POST",
+		  CURLOPT_POSTFIELDS => "{\n\t\"orderId\": $orderId,\n\t\"typeId\": 15,\n\t\"value\": $flagValue\n\t\n}",
+		  CURLOPT_HTTPHEADER => array(
+		    "authorization: Bearer ".$access_token,
+		    "cache-control: no-cache",
+		    "content-type: application/json",
+		    "postman-token: a834a0b3-4173-d881-88b5-8b4923c5b613"
+		  ),
+		));
+
+		$response = curl_exec($curl);
+		$err = curl_error($curl);
+
+		curl_close($curl);
+
+		if ($err) {
+		  return "cURL Error #:" . $err;
+		} else {
+		  return $response;
 		}
 	}
 }
