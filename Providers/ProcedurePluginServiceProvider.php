@@ -4,7 +4,7 @@ namespace ProcedurePlugin\Providers;
 use Plenty\Plugin\ServiceProvider;
 use Plenty\Modules\EventProcedures\Services\EventProceduresService;
 use Plenty\Modules\EventProcedures\Services\Entries\ProcedureEntry;
-use ProcedurePlugin\EventProcedures\Procedures;
+use ProcedurePlugin\EventProcedures\Filters;
  
 class ProcedurePluginServiceProvider extends ServiceProvider
 {
@@ -14,10 +14,11 @@ class ProcedurePluginServiceProvider extends ServiceProvider
      */
     public function boot(EventProceduresService $eventProceduresService)
     {
-        $eventProceduresService->register
-
+        $eventProceduresService->registerFilter(
+            'getorder',
+            ProcedureEntry::EVENT_TYPE_ORDER,
+            ['de' => 'Auftrag ist gesperrt', 'en' => 'new order'],
+            Filters::class . '@getorder'
+        );
     }
-
 }
-
-?>
