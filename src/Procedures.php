@@ -22,7 +22,7 @@ class Procedures
         $order = $event->getOrder();
         $order_id = $order->id;
         $orderItemsData = $this->order($order_id);
-        $orderItemsData = json_decode($orderData, TRUE);        
+        $orderItemsData = json_decode($orderItemsData, TRUE);        
 
         $operationData = array();
         $OrderProducts = array();
@@ -62,12 +62,12 @@ class Procedures
             $stock_id = $getVariation['entries']['model'];
             $qty = $value['quantity'];  
             $SingleRecipientOrder = $this->SingleRecipientOrder($customerDetail, $stock_id, $qty);
-            print_r($SingleRecipientOrder);
 
         }
 
         $orderStatusOrderId = $this->orderStatusOrderId($acquireOrder);
-        $OrderFlagProperty = $this->OrderFlagProperty();
+        $tracking_url = "test url";
+        $OrderFlagProperty = $this->OrderFlagProperty($order_id, $tracking_url);
         return $twig->render('ProcedurePlugin::content.getorder',array('data' => $acquireOrder));
     }
 
@@ -162,9 +162,10 @@ class Procedures
     }
     public function acquireOrder($productArray){
         $productTag = ""; 
-        foreach ($productArray as  $value) { //print_r($value);
+        foreach ($productArray as  $value) { 
              $productTag .= ' <product stock_id="'.$value['modelId'].'" quantity="'.$value['qty'].'" />';
         } 
+        $requestData = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><supplierorder><products>'.$productTag.'</products></supplierorder>';
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -175,7 +176,7 @@ class Procedures
           CURLOPT_TIMEOUT => 9000000,
           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
           CURLOPT_CUSTOMREQUEST => "POST",
-          CURLOPT_POSTFIELDS => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><supplierorder><products>'.$productTag.'</products></supplierorder>',,
+          CURLOPT_POSTFIELDS => $requestData,
           CURLOPT_HTTPHEADER => array(
             "authorization: Basic MTg0Y2U4Y2YtMmM5ZC00ZGU4LWI0YjEtMmZkNjcxM2RmOGNkOlN1cmZlcjc2",
             "cache-control: no-cache",
