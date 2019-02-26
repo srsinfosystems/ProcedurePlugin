@@ -18,7 +18,7 @@ class ContentController extends Controller
 	{	
 		$order_id = "101";
 		$orderItemsData = $this->order($order_id);
-		$orderItemsData = json_decode($orderData, TRUE);		
+		$orderItemsData = json_decode($orderItemsData, TRUE);		
 
 		$operationData = array();
 		$OrderProducts = array();
@@ -58,12 +58,11 @@ class ContentController extends Controller
 			$stock_id = $getVariation['entries']['model'];
 			$qty = $value['quantity'];	
 			$SingleRecipientOrder = $this->SingleRecipientOrder($customerDetail, $stock_id, $qty);
-			print_r($SingleRecipientOrder);
 
 		}
 
 		$orderStatusOrderId = $this->orderStatusOrderId($acquireOrder);
-		$OrderFlagProperty = $this->OrderFlagProperty();
+		$OrderFlagProperty = $this->OrderFlagProperty($order_id, "test");
 		return $twig->render('ProcedurePlugin::content.getorder',array('data' => $acquireOrder));
 	}
 
@@ -158,7 +157,7 @@ class ContentController extends Controller
 	}
 	public function acquireOrder($productArray){
 		$productTag = ""; 
-		foreach ($productArray as  $value) { //print_r($value);
+		foreach ($productArray as  $value) { 
 			 $productTag .= ' <product stock_id="'.$value['modelId'].'" quantity="'.$value['qty'].'" />';
 		} 
 		$requestData = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><supplierorder><products>'.$productTag.'</products></supplierorder>';
