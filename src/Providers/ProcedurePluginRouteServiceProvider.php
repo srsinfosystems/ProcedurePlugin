@@ -16,8 +16,8 @@ class ProcedurePluginRouteServiceProvider extends RouteServiceProvider
 	public function map(Router $router)
 	{
 		$router->get('getorder', 'ProcedurePlugin\Controllers\ContentController@getorder');
-
 		
 	}
+	
 
 }
