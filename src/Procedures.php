@@ -22,7 +22,7 @@ class Procedures
         $order = $event->getOrder();
         $order_id = $order->id;
         $orderItemsData = $this->order($order_id);
-        $orderItemsData = json_decode($orderItemsData, TRUE);        
+        $orderItemsData = json_decode($orderData, TRUE);        
 
         $operationData = array();
         $OrderProducts = array();
@@ -62,13 +62,12 @@ class Procedures
             $stock_id = $getVariation['entries']['model'];
             $qty = $value['quantity'];  
             $SingleRecipientOrder = $this->SingleRecipientOrder($customerDetail, $stock_id, $qty);
-            
+            print_r($SingleRecipientOrder);
 
         }
 
         $orderStatusOrderId = $this->orderStatusOrderId($acquireOrder);
-        $tracking_url = "test url";
-        $OrderFlagProperty = $this->OrderFlagProperty($order_id, $tracking_url);
+        $OrderFlagProperty = $this->OrderFlagProperty();
         return $twig->render('ProcedurePlugin::content.getorder',array('data' => $acquireOrder));
     }
 
@@ -163,7 +162,7 @@ class Procedures
     }
     public function acquireOrder($productArray){
         $productTag = ""; 
-        foreach ($productArray as  $value) { 
+        foreach ($productArray as  $value) { //print_r($value);
              $productTag .= ' <product stock_id="'.$value['modelId'].'" quantity="'.$value['qty'].'" />';
         } 
         $curl = curl_init();
