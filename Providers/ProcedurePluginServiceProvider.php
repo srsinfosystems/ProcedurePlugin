@@ -21,9 +21,4 @@ class ProcedurePluginServiceProvider extends ServiceProvider
             Filters::class . '@getorder'
         );
     }
-
-    public function register()
-    {
-        $this->getApplication()->register(ProcedurePluginRouteServiceProvider::class);
-    }
 }
