@@ -14,11 +14,17 @@ class ProcedurePluginServiceProvider extends ServiceProvider
      */
     public function boot(EventProceduresService $eventProceduresService)
     {
-        $eventProceduresService->registerFilter(
+        $eventProceduresService->registerProcedure(
             'getorder',
             ProcedureEntry::EVENT_TYPE_ORDER,
             ['de' => 'Auftrag ist gesperrt', 'en' => 'new order'],
-            Filters::class . '@getorder'
+            Procedures::class . '@getorder'
+        );
+        $eventProceduresService->registerFilter(
+            'orderLocked',
+            ProcedureEntry::EVENT_TYPE_ORDER,
+            ['de' => 'Auftrag ist gesperrt', 'en' => 'Order is locked'],
+            Filters::class . '@orderLocked'
         );
     }
 }
