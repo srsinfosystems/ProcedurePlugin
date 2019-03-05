@@ -1,9 +1,9 @@
 <?php
 namespace ProcedurePlugin\EventProcedures;
- 
+
 use Plenty\Modules\EventProcedures\Events\EventProceduresTriggered;
 use Plenty\Modules\Order\Contracts\OrderRepositoryContract;
- 
+
 class Procedures
 {
     /**
@@ -18,22 +18,26 @@ class Procedures
     }*/
 
     public function getorder(EventProceduresTriggered $event)
-    {   
+    {
 
         $order = $event->getOrder();
         $order_id = $order->id;
         $orderItemsData = $this->order($order_id);
-        $orderItemsData = json_decode($orderData, TRUE);        
+        $orderItemsData = json_decode($orderItemsData, TRUE);
+		if(empty($orderItemsData)) exit;
+		if(isset($orderItemsData['entries'][0]['warehouseId']) && $orderItemsData['entries'][0]['warehouseId'] != 5) {
+			exit;
+		}
 
         $operationData = array();
         $OrderProducts = array();
         foreach ($orderItemsData['entries'] as  $value) {
-            
+
             $getVariation = $this->getVariation($value['itemVariationId']);
             $getVariation = json_decode($getVariation, TRUE);
 
             $stock_id = $getVariation['entries']['model'];
-            $qty = $value['quantity'];  
+            $qty = $value['quantity'];
 
             if ($value['lockStatus']=="permanentlyLocked") {
                 $operationData[] = array(
@@ -43,25 +47,25 @@ class Procedures
                 $operationData[] = array(
                 "unlock"=>array("stock_id"=>"$stock_id", "qty"=>"$qty"));
             }
-            /*$operationData[] = array(             
+            /*$operationData[] = array(
                 "set"=>array("stock_id"=>"$stock_id", "qty"=>"$qty"));*/
 
             $OrderProducts[] = array('modelId'=>"$stock_id", 'qty'=>"$qty");
-            
+
         }
-        
+
         $reserveOrder = $this->reserve($operationData);
-        $lockedOrder = $this->lockedOrder();        
+        $lockedOrder = $this->lockedOrder();
         $acquireOrder = $this->acquireOrder($OrderProducts);
         $customerDetail = $this->customerDetail($order_id);
         $customerDetail['order_number'] = $acquireOrder;
         foreach ($orderItemsData['entries'] as  $value) {
-    
+
             $getVariation = $this->getVariation($value['itemVariationId']);
             $getVariation = json_decode($getVariation, TRUE);
 
             $stock_id = $getVariation['entries']['model'];
-            $qty = $value['quantity'];  
+            $qty = $value['quantity'];
             $SingleRecipientOrder = $this->SingleRecipientOrder($customerDetail, $stock_id, $qty);
 
         }
@@ -87,12 +91,12 @@ class Procedures
             $operationSet .= ' <model stock_id="'.$value['stock_id'].'" quantity="'.$value['qty'].'" />';
         }
         $operationSet .= '</operation>';
-        
+
         $requestData = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <root>
             $operationLock
             $operationUnlock
-        </root>';   
+        </root>';
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -120,9 +124,9 @@ class Procedures
         if ($err) {
           echo "cURL Error #:" . $err;
         } else {
-            $xml = simplexml_load_string($response); 
+            $xml = simplexml_load_string($response);
             $json = json_encode($xml);
-            $arrayData = json_decode($json,TRUE); 
+            $arrayData = json_decode($json,TRUE);
           return $arrayData;
         }
     }
@@ -154,17 +158,17 @@ class Procedures
         if ($err) {
           return "cURL Error #:" . $err;
         } else {
-          $xml = simplexml_load_string($response); 
+          $xml = simplexml_load_string($response);
             $json = json_encode($xml);
-            $arrayData = json_decode($json,TRUE); 
+            $arrayData = json_decode($json,TRUE);
           return $arrayData;
         }
     }
     public function acquireOrder($productArray){
-        $productTag = ""; 
-        foreach ($productArray as  $value) { 
+        $productTag = "";
+        foreach ($productArray as  $value) {
              $productTag .= ' <product stock_id="'.$value['modelId'].'" quantity="'.$value['qty'].'" />';
-        } 
+        }
         $requestData = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><supplierorder><products>'.$productTag.'</products></supplierorder>';
         $curl = curl_init();
 
@@ -191,7 +195,7 @@ class Procedures
 
         if ($err) {
           return "cURL Error #:" . $err;
-        } else {          
+        } else {
           return $response;
         }
     }
@@ -228,7 +232,7 @@ class Procedures
                     <stock_id>".$stock_id."</stock_id>
                     <quantity>".$qty."</quantity>
                 </item>
-            </item_list>            
+            </item_list>
         </order>
     </order_list>
 </root>";
@@ -259,9 +263,9 @@ class Procedures
         if ($err) {
           return "cURL Error #:" . $err;
         } else {
-          $xml = simplexml_load_string($response); 
+          $xml = simplexml_load_string($response);
             $json = json_encode($xml);
-            $arrayData = json_decode($json,TRUE); 
+            $arrayData = json_decode($json,TRUE);
           return $arrayData;
         }
     }
@@ -397,7 +401,7 @@ class Procedures
             $response = json_decode($response, TRUE);
             $detailArray = array();
             $detailArray['date'] = date('Y/m/d h:i:s')." +0000";
-            $detailArray['recipient'] = $response['addresses'][0]['name1'];         
+            $detailArray['recipient'] = $response['addresses'][0]['name1'];
             $detailArray['street_name'] = $response['addresses'][0]['address1'];
             $detailArray['address_number'] = $response['addresses'][0]['address2'];
             $detailArray['zip'] = $response['addresses'][0]['postalCode'];
@@ -413,7 +417,7 @@ class Procedures
                     $number .= $value;
                 }
             }
-            $detailArray['number'] = $number;   
+            $detailArray['number'] = $number;
 
           return $detailArray;
         }
@@ -486,9 +490,9 @@ class Procedures
         if ($err) {
           return "cURL Error #:" . $err;
         } else {
-          $xml = simplexml_load_string($response); 
+          $xml = simplexml_load_string($response);
             $json = json_encode($xml);
-            $arrayData = json_decode($json,TRUE); 
+            $arrayData = json_decode($json,TRUE);
           return $arrayData;
         }
     }
