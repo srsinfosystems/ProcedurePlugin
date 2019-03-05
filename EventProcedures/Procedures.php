@@ -25,7 +25,7 @@ class Procedures
         $orderItemsData = $this->order($order_id);
         $orderItemsData = json_decode($orderItemsData, TRUE);
 		if(empty($orderItemsData)) exit;
-		if(isset($orderItemsData['entries'][0]['warehouseId']) && $orderItemsData['entries'][0]['warehouseId'] != 5) {
+		if(isset($orderItemsData['entries'][0]['warehouseId']) && $orderItemsData['entries'][0]['warehouseId'] != 104) {
 			exit;
 		}
 
