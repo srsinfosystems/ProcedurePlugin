@@ -71,7 +71,9 @@ class Procedures
         }
 
         $orderStatusOrderId = $this->orderStatusOrderId($acquireOrder);
-        $OrderFlagProperty = $this->OrderFlagProperty($order_id, "test url");
+        $trackingNumber = 123456;
+        //$OrderFlagProperty = $this->OrderFlagProperty($order_id, "test url");
+        $ShippingPackage = $this->ShippingPackage($order_id,$trackingNumber);
         return $twig->render('ProcedurePlugin::content.getorder',array('data' => $acquireOrder));
     }
 
@@ -497,7 +499,7 @@ class Procedures
         }
     }
 
-    public function OrderFlagProperty($orderId, $flagValue){
+    /*public function OrderFlagProperty($orderId, $flagValue){
         $login = $this->login();
         $login = json_decode($login, true);
         $access_token = $login['access_token'];
@@ -532,5 +534,40 @@ class Procedures
         } else {
           return $response;
         }
+    }*/
+    public function ShippingPackage($orderId, $trackingUrl){
+      $login = $this->login();
+      $login = json_decode($login, true);
+      $access_token = $login['access_token'];
+      $host = $_SERVER['HTTP_HOST'];
+
+      $curl = curl_init();
+
+      curl_setopt_array($curl, array(
+        CURLOPT_URL => "https://".$host."/rest/orders/".$orderId."/shipping/packages",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => "{\n    \"packageId\": 3,\n    \"packageNumber\":\"$trackingUrl\",\n    \"packageType\": 9\n}",
+        CURLOPT_HTTPHEADER => array(
+          "authorization: Bearer ".$access_token,
+          "cache-control: no-cache",
+          "content-type: application/json"
+        ),
+      ));
+
+      $response = curl_exec($curl);
+      $err = curl_error($curl);
+
+      curl_close($curl);
+
+      if ($err) {
+        echo "cURL Error #:" . $err;
+      } else {
+        echo $response;
+      }
     }
 }
